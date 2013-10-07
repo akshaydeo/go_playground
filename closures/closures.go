@@ -77,9 +77,13 @@ func pong(channel <-chan string){
 	fmt.Println(msg)
 }
 
+
+func passByRef(com *complexNumber){
+	fmt.Println(&com)
+	com.print()
+}
+
 // main function
 func main() {
-	channel := make(chan string,1)
-	ping(channel, "message")	
-	pong(channel)
+
 }

@@ -1,27 +1,32 @@
 package main
 
-import "fmt"
-import "strconv"
-import "time"
+import (
+	"fmt"
+	"strconv" // added for giving proper name to job
+	"time"    // added for delaying consecutive inserts into job queue
+)
 
 func main() {
 
-	jobs := make(chan string, 200)
-
+	jobQueue := make(chan string, 200)
+	done := make(chan bool,1)
 	// consumer
 	go func() {
 		for {
-			job := <- jobs
-			fmt.Println("Got job:",job)
+			job := <-jobQueue
+			fmt.Println("Got job:", job)
 		}
+		done <- true
 	}()
-
 	// producer
-	i := int64(0)
-	for{
-		jobs <- strconv.FormatInt(i,10)
-		time.Sleep(time.Second * 5)
-		i++
-	}
-
+	go func() {
+		i := int64(0)
+		for {
+			jobQueue <- strconv.FormatInt(i, 10)
+			time.Sleep(time.Second * 5) // to wait for 5 seconds before adding one more job
+			i++
+		}
+		done <- true
+	}()
+	<-done
 }
